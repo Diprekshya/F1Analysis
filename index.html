@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What Wins F1 Championships? | Data Analysis 2004–2024</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* F1 Team Colors */
+  --mclaren:  #F47600;
+  --ferrari:  #ED1131;
+  --redbull:  #4781D7;
+  --mercedes: #00D7B6;
+  --aston:    #229971;
+  --alpine:   #00A1E8;
+  --haas:     #9C9FA2;
+  --williams: #1868DB;
+  --rb:       #6C98FF;
+  --sauber:   #01C00E;
+
+  /* F1 Timing / Broadcast Language */
+  --purple:   #A855F7;   /* fastest lap / sector */
+  --green:    #22C55E;   /* personal best */
+  --yellow:   #EAB308;   /* no improvement / caution */
+
+  /* Site Base — dark navy, not pitch black */
+  --bg:       #0b1120;
+  --panel:    #101827;
+  --card:     #14213d;
+  --card2:    #172035;
+  --border:   #1e304d;
+  --border2:  #243758;
+  --text:     #eaf0fb;
+  --muted:    #7c91b0;
+  --soft:     #c4d3ea;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+a { color: var(--alpine); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px; background: var(--panel);
+  border: 1px solid var(--border2);
+  padding: 1px 6px; border-radius: 3px;
+  color: var(--mercedes);
+}
+
+/* ── Navigation ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(11,17,32,.95);
+  border-bottom: 2px solid var(--ferrari);
+  backdrop-filter: blur(14px);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; height: 56px;
+}
+.nav-logo {
+  font-family: 'Space Mono', monospace;
+  font-weight: 700; font-size: 13px;
+  color: var(--ferrari); letter-spacing: 2px;
+}
+.nav-links { display: flex; gap: 28px; list-style: none; }
+.nav-links li { position: relative; }
+.nav-links a {
+  font-size: 11px; font-weight: 600;
+  color: var(--muted); letter-spacing: 1.2px;
+  text-transform: uppercase; transition: color .2s;
+  padding-bottom: 4px;
+}
+.nav-links a:hover { color: var(--text); text-decoration: none; }
+/* Q-specific nav colors on hover */
+.nav-links li:nth-child(1) a:hover { color: var(--redbull); }
+.nav-links li:nth-child(2) a:hover { color: var(--ferrari); }
+.nav-links li:nth-child(3) a:hover { color: var(--mercedes); }
+.nav-links li:nth-child(4) a:hover { color: var(--mclaren); }
+.nav-links li:nth-child(5) a:hover { color: var(--alpine); }
+.nav-links li:nth-child(6) a:hover { color: var(--muted); }
+.nav-links li:nth-child(7) a:hover { color: var(--yellow); }
+
+/* ── Hero ── */
+.hero {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  position: relative; overflow: hidden; text-align: center;
+  padding: 100px 40px 80px;
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 38%, rgba(71,129,215,.10) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 30% at 20% 80%, rgba(237,17,49,.06) 0%, transparent 55%),
+    radial-gradient(ellipse 30% 25% at 80% 75%, rgba(0,215,182,.05) 0%, transparent 50%),
+    var(--bg);
+}
+.hero-grid {
+  position: absolute; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, black, transparent);
+  opacity: .5;
+}
+/* Racing stripe accent in hero */
+.hero-stripe {
+  position: absolute; top: 0; left: 0; right: 0; height: 4px; z-index: 2;
+  background: linear-gradient(90deg,
+    var(--ferrari) 0%, var(--mclaren) 20%, var(--redbull) 40%,
+    var(--mercedes) 60%, var(--alpine) 80%, var(--aston) 100%);
+}
+.hero-content { position: relative; z-index: 1; max-width: 820px; }
+.hero-tag {
+  display: inline-block;
+  font-family: 'Space Mono', monospace; font-size: 10px;
+  letter-spacing: 3px; color: var(--ferrari);
+  border: 1px solid rgba(237,17,49,.4);
+  background: rgba(237,17,49,.07);
+  padding: 6px 16px; border-radius: 2px;
+  margin-bottom: 28px; text-transform: uppercase;
+}
+.hero h1 {
+  font-size: clamp(32px, 6vw, 64px);
+  font-weight: 700; line-height: 1.08;
+  letter-spacing: -1px; margin-bottom: 20px;
+}
+.hero h1 .accent-red    { color: var(--ferrari); }
+.hero-sub {
+  font-size: 16px; color: var(--soft);
+  max-width: 560px; margin: 0 auto 52px;
+  font-weight: 400; line-height: 1.75;
+}
+
+/* KPI tiles — each gets a team color */
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  border-radius: 6px; overflow: hidden;
+  border: 1px solid var(--border2);
+  box-shadow: 0 0 60px rgba(71,129,215,.1);
+}
+.kpi {
+  padding: 26px 18px; text-align: center;
+  position: relative; overflow: hidden;
+  transition: transform .2s;
+}
+.kpi::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.kpi:nth-child(1) { background: rgba(71,129,215,.14);  } /* Red Bull */
+.kpi:nth-child(1)::before { background: var(--redbull); }
+.kpi:nth-child(2) { background: rgba(237,17,49,.14);   } /* Ferrari */
+.kpi:nth-child(2)::before { background: var(--ferrari); }
+.kpi:nth-child(3) { background: rgba(0,215,182,.12);   } /* Mercedes */
+.kpi:nth-child(3)::before { background: var(--mercedes); }
+.kpi:nth-child(4) { background: rgba(244,118,0,.14);   } /* McLaren */
+.kpi:nth-child(4)::before { background: var(--mclaren); }
+.kpi:nth-child(5) { background: rgba(0,161,232,.12);   } /* Alpine */
+.kpi:nth-child(5)::before { background: var(--alpine); }
+
+.kpi:nth-child(1) .kpi-val { color: var(--redbull); }
+.kpi:nth-child(2) .kpi-val { color: var(--ferrari); }
+.kpi:nth-child(3) .kpi-val { color: var(--mercedes); }
+.kpi:nth-child(4) .kpi-val { color: var(--mclaren); }
+.kpi:nth-child(5) .kpi-val { color: var(--alpine); }
+
+.kpi-val {
+  font-family: 'Space Mono', monospace;
+  font-size: 34px; font-weight: 700;
+  display: block; line-height: 1;
+}
+.kpi-label {
+  font-size: 10px; color: var(--muted);
+  letter-spacing: 1.2px; text-transform: uppercase;
+  margin-top: 8px; display: block; line-height: 1.5;
+}
+.scroll-hint {
+  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+  z-index: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 6px;
+  font-size: 10px; color: var(--muted); letter-spacing: 2px;
+  text-transform: uppercase; animation: float 2s ease-in-out infinite;
+}
+.scroll-hint::after { content: '↓'; font-size: 16px; color: var(--ferrari); }
+@keyframes float {
+  0%,100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(6px); }
+}
+
+/* ── Sections ── */
+.section {
+  max-width: 1100px; margin: 0 auto;
+  padding: 80px 40px;
+}
+.section-divider {
+  border: none; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border2) 20%, var(--border2) 80%, transparent);
+  margin: 0 40px;
+}
+.section h2 {
+  font-size: clamp(22px, 3.5vw, 34px);
+  font-weight: 700; letter-spacing: -0.5px;
+  line-height: 1.2; margin-bottom: 14px;
+}
+.section-desc {
+  font-size: 15px; color: var(--soft);
+  max-width: 640px; margin-bottom: 40px;
+  font-weight: 400; line-height: 1.75;
+}
+
+/* Q-labels — each section gets its team color */
+.q-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px; letter-spacing: 3px;
+  text-transform: uppercase; margin-bottom: 10px; display: block;
+  font-weight: 700;
+}
+#q1 .q-label { color: var(--redbull); }
+#q2 .q-label { color: var(--ferrari); }
+#q3 .q-label { color: var(--mercedes); }
+#q4 .q-label { color: var(--mclaren); }
+#q5 .q-label { color: var(--alpine); }
+#methodology .q-label { color: var(--muted); }
+
+/* ── Chart cards ── */
+.chart-grid { display: grid; gap: 16px; }
+.chart-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.chart-grid.cols-1 { grid-template-columns: 1fr; }
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 5px; overflow: hidden;
+  box-shadow: 0 2px 20px rgba(0,0,0,.25);
+}
+.chart-card img { width: 100%; height: auto; display: block; }
+.chart-caption {
+  padding: 12px 18px;
+  font-size: 11px; color: var(--muted);
+  letter-spacing: .4px; border-top: 1px solid var(--border);
+  line-height: 1.6;
+}
+
+/* ── Finding blocks — structured format ── */
+.finding {
+  background: var(--card2);
+  border-left: 4px solid;
+  padding: 28px 32px; margin-top: 28px;
+  border-radius: 0 5px 5px 0;
+}
+#q1 .finding { border-color: var(--redbull);  background: rgba(71,129,215,.08); }
+#q2 .finding { border-color: var(--ferrari);  background: rgba(237,17,49,.07);  }
+#q3 .finding { border-color: var(--mercedes); background: rgba(0,215,182,.07); }
+#q4 .finding { border-color: var(--mclaren);  background: rgba(244,118,0,.08); }
+#q5 .finding { border-color: var(--alpine);   background: rgba(0,161,232,.07); }
+
+.finding-label {
+  font-size: 15px; font-weight: 700;
+  color: var(--text); margin-bottom: 10px;
+  display: block; line-height: 1.4;
+}
+#q1 .finding-label span { color: var(--redbull); }
+#q2 .finding-label span { color: var(--ferrari); }
+#q3 .finding-label span { color: var(--mercedes); }
+#q4 .finding-label span { color: var(--mclaren); }
+#q5 .finding-label span { color: var(--alpine); }
+
+.finding-body {
+  font-size: 14px; color: var(--soft);
+  line-height: 1.8; margin-bottom: 14px;
+}
+.finding-body strong { color: var(--text); }
+
+.finding-bullets {
+  list-style: none; padding: 0;
+  margin: 0 0 18px; display: flex; flex-direction: column; gap: 8px;
+}
+.finding-bullets li {
+  font-size: 14px; color: var(--soft);
+  padding-left: 22px; position: relative; line-height: 1.65;
+}
+.finding-bullets li::before {
+  content: '—'; position: absolute; left: 0;
+  font-weight: 600;
+}
+#q1 .finding-bullets li::before { color: var(--redbull); }
+#q2 .finding-bullets li::before { color: var(--ferrari); }
+#q3 .finding-bullets li::before { color: var(--mercedes); }
+#q4 .finding-bullets li::before { color: var(--mclaren); }
+#q5 .finding-bullets li::before { color: var(--alpine); }
+
+.finding-bullets strong { color: var(--text); }
+
+.finding-takeaway {
+  font-size: 14px; color: var(--text);
+  line-height: 1.7; padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.finding-takeaway strong { font-weight: 700; }
+
+/* ── Stat pills ── */
+.stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
+.stat-pill {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 4px; padding: 14px 22px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.stat-pill strong {
+  font-family: 'Space Mono', monospace;
+  font-size: 22px; line-height: 1;
+}
+.stat-pill:nth-child(1) strong { color: var(--ferrari); }
+.stat-pill:nth-child(2) strong { color: var(--mercedes); }
+.stat-pill:nth-child(3) strong { color: var(--purple); }
+.stat-pill:nth-child(4) strong { color: var(--yellow); }
+.stat-pill span { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+
+/* ── F1 color legend strip ── */
+.f1-legend {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  align-items: center; margin-bottom: 32px;
+}
+.legend-pill {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 10px; color: var(--muted); letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.legend-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Methodology table ── */
+.method-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+  margin-top: 20px;
+}
+.method-table th {
+  background: var(--panel); color: var(--muted);
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  padding: 13px 16px; text-align: left;
+  border-bottom: 2px solid var(--border2);
+  font-weight: 600;
+}
+.method-table td {
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  vertical-align: top; color: var(--soft); line-height: 1.6;
+}
+.method-table tr:hover td { background: rgba(255,255,255,.025); }
+.method-table td:first-child {
+  color: var(--mercedes); font-family: 'Space Mono', monospace;
+  font-size: 11px; white-space: nowrap;
+}
+
+/* ── Team color swatches (reference bar) ── */
+.team-bar {
+  display: flex; gap: 0; overflow: hidden;
+  border-radius: 4px; margin-bottom: 32px;
+  height: 8px;
+}
+.team-bar-seg { flex: 1; }
+
+/* ── Conclusion ── */
+.conclusion {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-top: 3px solid var(--ferrari);
+  border-radius: 0 0 6px 6px;
+  padding: 44px 48px;
+  margin-top: 56px;
+  box-shadow: 0 4px 40px rgba(237,17,49,.08);
+}
+.conclusion h3 {
+  font-size: 20px; font-weight: 700;
+  margin-bottom: 18px; letter-spacing: -0.3px;
+  color: var(--ferrari);
+  font-family: 'Space Mono', monospace;
+  font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
+}
+.conclusion p {
+  font-size: 15px; color: var(--soft);
+  line-height: 1.85; max-width: 780px;
+  text-align: justify;
+}
+
+/* ── Footer ── */
+footer {
+  border-top: 1px solid var(--border2);
+  padding: 28px 40px;
+  margin-top: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 11px; color: var(--muted);
+}
+.footer-links { display: flex; gap: 20px; }
+.footer-links a { color: var(--muted); }
+.footer-links a:hover { color: var(--mercedes); }
+
+/* ── Circuit reference grid ── */
+.circuit-ref-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 14px; margin-top: 28px;
+}
+.circuit-ref-card {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-top: 3px solid;
+  border-radius: 4px; padding: 16px;
+}
+.circuit-ref-type {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase; font-weight: 700;
+  margin-bottom: 12px;
+}
+.circuit-list {
+  list-style: none; padding: 0;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.circuit-list li {
+  display: flex; justify-content: space-between;
+  align-items: baseline; gap: 8px;
+  font-size: 11.5px; line-height: 1.4;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.circuit-list li:last-child { border-bottom: none; padding-bottom: 0; }
+.c-name { color: var(--text); flex: 1; }
+.c-country { color: var(--muted); font-size: 10px; white-space: nowrap; }
+
+/* ── Circuit ref note ── */
+.circuit-ref-note {
+  font-size: 13px; color: var(--muted);
+  margin-top: 24px; margin-bottom: 16px;
+  padding: 12px 18px;
+  background: var(--panel);
+  border-left: 3px solid var(--alpine);
+  border-radius: 0 4px 4px 0;
+  line-height: 1.7;
+}
+.circuit-ref-note strong { color: var(--text); }
+
+/* ── Archetype summary table ── */
+.archetype-summary {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px; margin-top: 20px;
+}
+.archetype-summary th {
+  background: var(--panel); color: var(--muted);
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  padding: 12px 16px; text-align: left;
+  border-bottom: 2px solid var(--border2);
+  font-weight: 600;
+}
+.archetype-summary td {
+  padding: 11px 16px; border-bottom: 1px solid var(--border);
+  vertical-align: middle; color: var(--soft); line-height: 1.5;
+}
+.archetype-summary tr:last-child td { border-bottom: none; }
+.archetype-summary tr:hover td { background: rgba(255,255,255,.02); }
+.archetype-summary td:nth-child(2),
+.archetype-summary td:nth-child(3) {
+  font-family: 'Space Mono', monospace;
+  font-weight: 700; color: var(--text); font-size: 14px;
+}
+
+/* ── Appendix / Glossary ── */
+.glossary-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 14px; margin-top: 28px;
+}
+.glossary-card {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 5px; padding: 20px 22px;
+}
+.glossary-term {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px; font-weight: 700;
+  color: var(--text); margin-bottom: 2px;
+  display: block;
+}
+.glossary-abbr {
+  font-size: 10px; color: var(--muted);
+  letter-spacing: 1px; text-transform: uppercase;
+  margin-bottom: 8px; display: block;
+}
+.glossary-def {
+  font-size: 13px; color: var(--soft);
+  line-height: 1.7;
+}
+.glossary-def strong { color: var(--text); }
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .hero { padding: 80px 20px 50px; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .section { padding: 60px 20px; }
+  .chart-grid.cols-2 { grid-template-columns: 1fr; }
+  .conclusion { padding: 28px 24px; }
+  .circuit-ref-grid { grid-template-columns: 1fr 1fr; }
+  .glossary-grid { grid-template-columns: 1fr; }
+  footer { flex-direction: column; gap: 10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+  <div class="nav-logo">F1 ANALYSIS</div>
+  <ul class="nav-links">
+    <li><a href="#q1">Q1 — Car</a></li>
+    <li><a href="#q2">Q2 — DNFs</a></li>
+    <li><a href="#q3">Q3 — Qualifying</a></li>
+    <li><a href="#q4">Q4 — Pit Stops</a></li>
+    <li><a href="#q5">Q5 — Circuits</a></li>
+    <li><a href="#methodology">Methodology</a></li>
+    <li><a href="#appendix">Glossary</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-stripe"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Business Analysis Portfolio &nbsp;·&nbsp; F1 &nbsp;·&nbsp; 2004–2024</div>
+    <h1>What <span class="accent-red">Wins</span><br>F1 Championships?</h1>
+    <p class="hero-sub">
+      A structured data analysis of 21 seasons of Formula 1 racing —
+      examining car superiority, reliability, qualifying pace, pit strategy,
+      and circuit DNA to answer one central question.
+    </p>
+
+    <!-- Team color legend strip -->
+    <div class="team-bar">
+      <div class="team-bar-seg" style="background:var(--ferrari)"></div>
+      <div class="team-bar-seg" style="background:var(--mclaren)"></div>
+      <div class="team-bar-seg" style="background:var(--redbull)"></div>
+      <div class="team-bar-seg" style="background:var(--mercedes)"></div>
+      <div class="team-bar-seg" style="background:var(--aston)"></div>
+      <div class="team-bar-seg" style="background:var(--alpine)"></div>
+      <div class="team-bar-seg" style="background:var(--williams)"></div>
+      <div class="team-bar-seg" style="background:var(--rb)"></div>
+      <div class="team-bar-seg" style="background:var(--haas)"></div>
+      <div class="team-bar-seg" style="background:var(--sauber)"></div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <span class="kpi-val">86%</span>
+        <span class="kpi-label">Car–Driver title match rate</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-val">5</span>
+        <span class="kpi-label">Seasons where DNFs flipped the title</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-val">1.3</span>
+        <span class="kpi-label">Avg champion DNFs per season</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-val">2.2s</span>
+        <span class="kpi-label">Pit stop gap: best vs worst team</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-val">4</span>
+        <span class="kpi-label">Circuit archetypes analysed</span>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">scroll</div>
+</section>
+
+<!-- F1 Color Language Reference -->
+<div style="max-width:1100px;margin:0 auto;padding:24px 40px 0;display:flex;align-items:center;gap:32px;flex-wrap:wrap;border-top:1px solid var(--border)">
+  <span style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase">F1 Color Language</span>
+  <div class="f1-legend">
+    <div class="legend-pill"><div class="legend-dot" style="background:var(--purple)"></div>Fastest Lap/Sector</div>
+    <div class="legend-pill"><div class="legend-dot" style="background:var(--green)"></div>Personal Best</div>
+    <div class="legend-pill"><div class="legend-dot" style="background:var(--yellow)"></div>No Improvement</div>
+    <div class="legend-pill"><div class="legend-dot" style="background:var(--ferrari)"></div>Soft Tyre</div>
+    <div class="legend-pill"><div class="legend-dot" style="background:var(--yellow)"></div>Medium Tyre</div>
+    <div class="legend-pill"><div class="legend-dot" style="background:#eaf0fb"></div>Hard Tyre</div>
+  </div>
+</div>
+
+<!-- Q1 -->
+<hr class="section-divider" style="margin-top:24px">
+<section class="section" id="q1">
+  <span class="q-label">Question 1 &nbsp;·&nbsp; Red Bull Era Context</span>
+  <h2>Does the best car always win the title?</h2>
+  <p class="section-desc">
+    Comparing the constructor champion and driver champion team each season from 2004–2024.
+    When they match, the car dominated. When they diverge, something extraordinary happened.
+  </p>
+  <div class="chart-grid cols-1">
+    <div class="chart-card">
+      <img src="charts/q1_match_bar.png" alt="Q1 — Driver and Constructor Champions by Season">
+      <div class="chart-caption">Each bar = one season. Green = driver champion and constructor champion from the same team. Red = different teams won each title.</div>
+    </div>
+  </div>
+  <div class="chart-grid cols-1" style="margin-top:16px">
+    <div class="chart-card">
+      <img src="charts/q1_exceptions.png" alt="Q1 — The 3 Exception Seasons">
+      <div class="chart-caption">The 3 seasons where driver and constructor champions came from different teams — bars colored by official team colors.</div>
+    </div>
+  </div>
+  <div class="finding">
+    <span class="finding-label"><span>Finding:</span> The best car wins the title 86% of the time</span>
+    <p class="finding-body">In <strong>18 of 21 seasons</strong>, the drivers' champion and constructors' champion came from the same team, confirming that car performance is the dominant championship factor. The three exceptions are the most dramatic seasons in modern F1:</p>
+    <ul class="finding-bullets">
+      <li><strong>2008</strong> — Hamilton's last-lap miracle in Brazil, winning the title by a single point (McLaren driver vs Ferrari constructor)</li>
+      <li><strong>2021</strong> — The Abu Dhabi Safety Car controversy gave Verstappen the title over Hamilton (Red Bull driver vs Mercedes constructor)</li>
+      <li><strong>2024</strong> — McLaren won the constructors' title while Verstappen secured a 4th consecutive drivers' crown for Red Bull</li>
+    </ul>
+    <p class="finding-takeaway"><strong>Takeaway:</strong> If you have the best car, you almost certainly win. The three exceptions are not statistical noise — they are the moments where driver brilliance and race-day execution overrode machinery.</p>
+  </div>
+</section>
+
+<!-- Q2 -->
+<hr class="section-divider">
+<section class="section" id="q2">
+  <span class="q-label">Question 2 &nbsp;·&nbsp; Ferrari Red = Retirement Risk</span>
+  <h2>How much do DNFs cost championships?</h2>
+  <p class="section-desc">
+    Analysing retirements per season for champions and runners-up, estimating points lost,
+    and identifying seasons where reliability was the single decisive variable.
+  </p>
+  <div class="chart-grid cols-1">
+    <div class="chart-card">
+      <img src="charts/q2_dnf_analysis.png" alt="Q2 — DNF Analysis per Season">
+      <div class="chart-caption">Top: DNF count per season (purple = champion, red = runner-up). Bottom: estimated points lost vs the actual championship margin (silver bar).</div>
+    </div>
+  </div>
+  <div class="chart-grid cols-1" style="margin-top:16px">
+    <div class="chart-card">
+      <img src="charts/q2_decisive.png" alt="Q2 — Championship-Decisive DNF Seasons">
+      <div class="chart-caption">Yellow = runner-up's net DNF points advantage. Silver = actual margin. Where yellow exceeds silver, reliability alone could have reversed the title.</div>
+    </div>
+  </div>
+  <div class="stat-row">
+    <div class="stat-pill"><strong>1.3</strong><span>Avg champion DNFs / season</span></div>
+    <div class="stat-pill"><strong>1.9</strong><span>Avg runner-up DNFs / season</span></div>
+    <div class="stat-pill"><strong>5</strong><span>Seasons where DNFs were decisive</span></div>
+    <div class="stat-pill"><strong>2012</strong><span>Starkest case — Alonso lost by 3 pts</span></div>
+  </div>
+  <div class="finding">
+    <span class="finding-label"><span>Finding:</span> DNFs were championship-decisive in multiple close seasons</span>
+    <p class="finding-body">Using actual retirement data from <code>status.csv</code> and estimated points lost per DNF, the analysis flagged seasons where the runner-up's estimated lost points exceeded the final championship margin. The standout cases:</p>
+    <ul class="finding-bullets">
+      <li><strong>2012</strong> — Alonso lost to Vettel by just 3 points, despite having 2 DNFs worth ~40 estimated points</li>
+      <li><strong>2010</strong> — Alonso lost to Vettel by 4 points with 2 DNFs</li>
+      <li><strong>2016</strong> — Hamilton lost to Rosberg by 5 points with 2 DNFs</li>
+      <li>Champions averaged <strong>1.3 DNFs per season</strong> — notably fewer than most runners-up</li>
+    </ul>
+    <p class="finding-takeaway"><strong>Takeaway:</strong> Reliability is a silent championship weapon. In close seasons, the driver who finishes more races wins.</p>
+  </div>
+</section>
+
+<!-- Q3 -->
+<hr class="section-divider">
+<section class="section" id="q3">
+  <span class="q-label">Question 3 &nbsp;·&nbsp; Purple = Fastest, Green = Improvement</span>
+  <h2>Is qualifying speed or race pace more predictive?</h2>
+  <p class="section-desc">
+    Comparing pole positions, wins, average grid position, and average race finish for every championship-winning season
+    to identify whether Saturday or Sunday performance defines a title.
+  </p>
+  <div class="chart-grid cols-1">
+    <div class="chart-card">
+      <img src="charts/q3_grid_vs_finish.png" alt="Q3 — Avg Grid vs Avg Finish">
+      <div class="chart-caption">Each point = one champion season. Points below the diagonal line improved their grid position on race day — race pace outperformed qualifying.</div>
+    </div>
+  </div>
+  <div class="chart-grid cols-1" style="margin-top:16px">
+    <div class="chart-card">
+      <img src="charts/q3_poles_vs_wins.png" alt="Q3 — Poles vs Wins">
+      <div class="chart-caption">Poles vs race wins per championship season. Champions with more wins than poles converted race pace into points more efficiently than qualifying pace suggested.</div>
+    </div>
+  </div>
+  <div class="chart-grid cols-1" style="margin-top:16px">
+    <div class="chart-card">
+      <img src="charts/q3_positions_gained.png" alt="Q3 — Positions Gained Grid to Finish">
+      <div class="chart-caption">Average positions gained from grid to final classification across all races in a championship season. Positive bars (teal) = champion consistently moved forward on Sundays.</div>
+    </div>
+  </div>
+  <div class="finding">
+    <span class="finding-label"><span>Finding:</span> Race pace and execution matter more than Saturday qualifying</span>
+    <p class="finding-body">Champions averaged 8.3 poles but won significantly more races than their pole count alone would predict. Key examples:</p>
+    <ul class="finding-bullets">
+      <li><strong>Hamilton 2019</strong> — 5 poles, 11 wins (220% conversion — a pure racer's title)</li>
+      <li><strong>Alonso 2013</strong> — 0 poles, 2 wins, yet finished P2 in the championship purely on consistency</li>
+      <li><strong>Verstappen 2023</strong> — 13 poles AND 19 wins — dominant on both days</li>
+      <li><strong>Rosberg 2016</strong> — 8 poles, 9 wins, beat Hamilton who had 12 poles</li>
+    </ul>
+    <p class="finding-takeaway"><strong>Takeaway:</strong> Pole position helps but doesn't define champions. Converting race opportunities — especially from P3–P5 on the grid — is what separates title winners.</p>
+  </div>
+</section>
+
+<!-- Q4 -->
+<hr class="section-divider">
+<section class="section" id="q4">
+  <span class="q-label">Question 4 &nbsp;·&nbsp; McLaren Orange = Fastest Hands Win</span>
+  <h2>Do pit stop strategies decide races?</h2>
+  <p class="section-desc">
+    Analysing average pit stop durations by team across 2015–2024, removing outliers over 60 seconds,
+    and tracking how the major constructors have evolved their crew performance across a decade.
+  </p>
+  <div class="chart-grid cols-1">
+    <div class="chart-card">
+      <img src="charts/q4_pit_avg.png" alt="Q4 — Average Pit Stop by Constructor">
+      <div class="chart-caption">Average total pit lane transit time (entry + stationary + exit) per constructor, 2015–2024. All teams on the same measurement basis.</div>
+    </div>
+  </div>
+  <div class="chart-grid cols-1" style="margin-top:16px">
+    <div class="chart-card">
+      <img src="charts/q4_pit_trend.png" alt="Q4 — Pit Performance Trend">
+      <div class="chart-caption">Year-on-year pit performance evolution for the four major constructors. Downward = improving crew efficiency.</div>
+    </div>
+  </div>
+  <div class="finding">
+    <span class="finding-label"><span>Finding:</span> Pit stop efficiency compounds into a ~97-second seasonal advantage</span>
+    <p class="finding-body">The gap between the fastest and slowest top teams is approximately <strong>2.2 seconds per stop</strong>. Across 22 races × 2 stops per race, that compounds to roughly 97 seconds of cumulative pit time advantage across the season.</p>
+    <ul class="finding-bullets">
+      <li><strong>Mercedes</strong> led pit performance during 2015–2021, matching their championship dominance in the same era</li>
+      <li><strong>Red Bull</strong> improved dramatically from 2020 onward, correlating directly with their run of championship wins</li>
+      <li>A 2.2s gap per stop = ~97 seconds across a full season — equivalent to roughly one full strategic undercut window</li>
+      <li>The fastest pit crews consistently belong to title contenders — crew excellence amplifies car pace, it doesn't substitute for it</li>
+    </ul>
+    <p class="finding-takeaway"><strong>Takeaway:</strong> Pit stop speed is not a substitute for car pace — it amplifies it. The best teams are fast everywhere.</p>
+  </div>
+</section>
+
+<!-- Q5 -->
+<hr class="section-divider">
+<section class="section" id="q5">
+  <span class="q-label">Question 5 &nbsp;·&nbsp; Alpine Blue = Circuit Fingerprint</span>
+  <h2>Circuit DNA — which teams dominate which tracks?</h2>
+  <p class="section-desc">
+    Classifying circuits into four archetypes — Street, High Speed, Slow/Technical, and Mixed —
+    and mapping race wins by constructor to reveal each team's performance fingerprint.
+  </p>
+  <div class="chart-grid cols-1">
+    <div class="chart-card">
+      <img src="charts/q5_circuit_heatmap.png" alt="Q5 — Circuit DNA Heatmap">
+      <div class="chart-caption">Race wins by constructor × circuit type (2010–2024). Colour intensity indicates win concentration — darker = stronger domain.</div>
+    </div>
+  </div>
+  <div class="chart-grid cols-1" style="margin-top:16px">
+    <div class="chart-card">
+      <img src="charts/q5_circuit_profile.png" alt="Q5 — Win Profile by Team">
+      <div class="chart-caption">Total race wins per constructor stacked by circuit type. Shows each team's absolute volume of wins broken down by track character.</div>
+    </div>
+  </div>
+  <div class="chart-grid cols-1" style="margin-top:16px">
+    <div class="chart-card">
+      <img src="charts/q5_circuit_normalised.png" alt="Q5 — Normalised Circuit Mix">
+      <div class="chart-caption">Normalised win percentage per team by circuit type — reveals each constructor's relative comfort zone regardless of total win count.</div>
+    </div>
+  </div>
+  <div class="finding">
+    <span class="finding-label"><span>Finding:</span> Every constructor has a circuit comfort zone shaped by its car philosophy</span>
+    <p class="finding-body">Classifying 14 years of race results by circuit archetype reveals distinct performance fingerprints for each major constructor:</p>
+    <ul class="finding-bullets">
+      <li><strong>Red Bull</strong> — dominant at high-speed circuits (Spa, Silverstone, Monza) where downforce efficiency and energy deployment matter most</li>
+      <li><strong>Ferrari</strong> — disproportionately strong on technical/slow circuits (Hungaroring, Zandvoort) requiring mechanical grip and precision</li>
+      <li><strong>Mercedes</strong> — excelled on street circuits (Monaco, Singapore, Baku) during the hybrid era through superior chassis composure on low-grip surfaces</li>
+      <li><strong>McLaren 2023–24 resurgence</strong> — most pronounced on high-speed and mixed layouts (COTA, Bahrain, Interlagos), consistent with their fast-corner aerodynamic strengths</li>
+      <li>Mixed circuits make up <strong>52% of the active calendar</strong> — rewarding all-round car balance more than any single specialist strength</li>
+    </ul>
+    <p class="finding-takeaway"><strong>Takeaway:</strong> Circuit DNA is a sleeper factor in championship analysis. With 52% of races on mixed-character tracks, teams that can adapt their setup across archetypes — rather than optimise for one — consistently outscore specialist rivals over a full season.</p>
+  </div>
+
+  <!-- Circuit archetype reference -->
+  <div class="circuit-ref-note">
+    Of the <strong>77 circuits</strong> in the dataset, <strong>53 have been retired</strong> from the F1 calendar. The table below shows the <strong>23 currently active circuits</strong> on the 2026 calendar, classified by track archetype.
+  </div>
+  <div class="circuit-ref-grid" style="grid-template-columns: repeat(2,1fr); gap:14px">
+    <div class="circuit-ref-card" style="border-top-color:var(--ferrari)">
+      <div class="circuit-ref-type" style="color:var(--ferrari)">🏙️ Street &nbsp;<span style="font-weight:400;opacity:.6">(5 circuits)</span></div>
+      <ul class="circuit-list">
+        <li><span class="c-name">Circuit de Monaco</span><span class="c-country">Monte-Carlo</span></li>
+        <li><span class="c-name">Marina Bay Street Circuit</span><span class="c-country">Singapore</span></li>
+        <li><span class="c-name">Jeddah Corniche Circuit</span><span class="c-country">Saudi Arabia</span></li>
+        <li><span class="c-name">Baku City Circuit</span><span class="c-country">Azerbaijan</span></li>
+        <li><span class="c-name">Las Vegas Strip Street Circuit</span><span class="c-country">USA</span></li>
+      </ul>
+    </div>
+    <div class="circuit-ref-card" style="border-top-color:var(--mclaren)">
+      <div class="circuit-ref-type" style="color:var(--mclaren)">🚀 High-Speed &nbsp;<span style="font-weight:400;opacity:.6">(4 circuits)</span></div>
+      <ul class="circuit-list">
+        <li><span class="c-name">Spa-Francorchamps</span><span class="c-country">Belgium</span></li>
+        <li><span class="c-name">Silverstone Circuit</span><span class="c-country">Great Britain</span></li>
+        <li><span class="c-name">Autodromo Nazionale di Monza</span><span class="c-country">Italy</span></li>
+        <li><span class="c-name">Red Bull Ring</span><span class="c-country">Austria</span></li>
+      </ul>
+    </div>
+    <div class="circuit-ref-card" style="border-top-color:var(--alpine)">
+      <div class="circuit-ref-type" style="color:var(--alpine)">🔀 Mixed &nbsp;<span style="font-weight:400;opacity:.6">(12 circuits)</span></div>
+      <ul class="circuit-list">
+        <li><span class="c-name">Albert Park</span><span class="c-country">Melbourne, Australia</span></li>
+        <li><span class="c-name">Bahrain International Circuit</span><span class="c-country">Sakhir</span></li>
+        <li><span class="c-name">Circuit de Barcelona-Catalunya</span><span class="c-country">Barcelona, Spain</span></li>
+        <li><span class="c-name">Circuit Gilles Villeneuve</span><span class="c-country">Montréal, Canada</span></li>
+        <li><span class="c-name">Interlagos</span><span class="c-country">São Paulo, Brazil</span></li>
+        <li><span class="c-name">Shanghai International Circuit</span><span class="c-country">China</span></li>
+        <li><span class="c-name">Circuit of the Americas</span><span class="c-country">Austin, USA</span></li>
+        <li><span class="c-name">Miami International Autodrome</span><span class="c-country">Miami, USA</span></li>
+        <li><span class="c-name">Suzuka Circuit</span><span class="c-country">Japan</span></li>
+        <li><span class="c-name">Yas Marina Circuit</span><span class="c-country">Abu Dhabi</span></li>
+        <li><span class="c-name">Autódromo Hermanos Rodríguez</span><span class="c-country">Mexico City</span></li>
+        <li><span class="c-name">Losail International Circuit</span><span class="c-country">Qatar</span></li>
+      </ul>
+    </div>
+    <div class="circuit-ref-card" style="border-top-color:var(--mercedes)">
+      <div class="circuit-ref-type" style="color:var(--mercedes)">🔧 Technical / Slow &nbsp;<span style="font-weight:400;opacity:.6">(2 circuits)</span></div>
+      <ul class="circuit-list">
+        <li><span class="c-name">Hungaroring</span><span class="c-country">Budapest, Hungary</span></li>
+        <li><span class="c-name">Circuit Park Zandvoort</span><span class="c-country">Netherlands</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Summary table -->
+  <table class="archetype-summary">
+    <thead>
+      <tr>
+        <th>Archetype</th>
+        <th>Circuits</th>
+        <th>% of Calendar</th>
+        <th>Key Characteristic</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span style="color:var(--ferrari);font-weight:700">🏙️ Street</span></td>
+        <td>5</td>
+        <td>22%</td>
+        <td>Temporary city roads, barriers, low grip, no run-off</td>
+      </tr>
+      <tr>
+        <td><span style="color:var(--mclaren);font-weight:700">🚀 High-Speed</span></td>
+        <td>4</td>
+        <td>17%</td>
+        <td>Long straights, high-speed corners, top-speed and aero efficiency critical</td>
+      </tr>
+      <tr>
+        <td><span style="color:var(--alpine);font-weight:700">🔀 Mixed</span></td>
+        <td>12</td>
+        <td>52%</td>
+        <td>Blend of slow and fast sections — rewards all-round car balance</td>
+      </tr>
+      <tr>
+        <td><span style="color:var(--mercedes);font-weight:700">🔧 Technical/Slow</span></td>
+        <td>2</td>
+        <td>9%</td>
+        <td>Tight, low-speed layouts — mechanical grip and precision over raw pace</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Methodology -->
+<hr class="section-divider">
+<section class="section" id="methodology">
+  <span class="q-label">Methodology</span>
+  <h2>Data sources &amp; analytical approach</h2>
+  <p class="section-desc">
+    All data sourced from the Ergast Motor Racing Database via Kaggle, covering 2004–2024 (21 seasons).
+    Analysis built in Python using pandas, matplotlib, and seaborn. Excel workbook auto-generated with openpyxl.
+  </p>
+
+  <!-- Team color reference -->
+  <div style="margin-bottom:32px">
+    <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px">Team Color Reference</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px">
+      <div class="legend-pill"><div class="legend-dot" style="background:var(--ferrari)"></div>Ferrari #ED1131</div>
+      <div class="legend-pill"><div class="legend-dot" style="background:var(--mclaren)"></div>McLaren #F47600</div>
+      <div class="legend-pill"><div class="legend-dot" style="background:var(--redbull)"></div>Red Bull #4781D7</div>
+      <div class="legend-pill"><div class="legend-dot" style="background:var(--mercedes)"></div>Mercedes #00D7B6</div>
+      <div class="legend-pill"><div class="legend-dot" style="background:var(--aston)"></div>Aston Martin #229971</div>
+      <div class="legend-pill"><div class="legend-dot" style="background:var(--alpine)"></div>Alpine #00A1E8</div>
+      <div class="legend-pill"><div class="legend-dot" style="background:var(--williams)"></div>Williams #1868DB</div>
+      <div class="legend-pill"><div class="legend-dot" style="background:var(--rb)"></div>RB #6C98FF</div>
+      <div class="legend-pill"><div class="legend-dot" style="background:var(--haas)"></div>Haas #9C9FA2</div>
+      <div class="legend-pill"><div class="legend-dot" style="background:var(--sauber)"></div>Kick Sauber #01C00E</div>
+    </div>
+  </div>
+
+  <table class="method-table">
+    <thead>
+      <tr>
+        <th>Question</th>
+        <th>Primary Dataset(s)</th>
+        <th>Metric Used</th>
+        <th>Known Limitation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Q1 — Car wins</td>
+        <td>driver_standings.csv · constructor_standings.csv</td>
+        <td>Final-race standings position by year</td>
+        <td>Does not capture mid-season car development trajectory</td>
+      </tr>
+      <tr>
+        <td>Q2 — DNF cost</td>
+        <td>results.csv · status.csv · driver_standings.csv</td>
+        <td>Estimated pts lost = avg finish position × points scale</td>
+        <td>DNFs often occur from strong grid positions — conservative estimate</td>
+      </tr>
+      <tr>
+        <td>Q3 — Quali vs race</td>
+        <td>qualifying.csv · results.csv</td>
+        <td>Grid pos, finish pos, positions gained per race</td>
+        <td>Qualifying data coverage is variable before 2010</td>
+      </tr>
+      <tr>
+        <td>Q4 — Pit stops</td>
+        <td>pit_stops.csv</td>
+        <td>Avg total pit lane transit time (outliers >60s removed)</td>
+        <td>Pit stop data only available from 2011 onwards</td>
+      </tr>
+      <tr>
+        <td>Q5 — Circuit DNA</td>
+        <td>results.csv · circuits.csv · races.csv</td>
+        <td>Race wins by circuit type classification</td>
+        <td>Circuit classification uses heuristic rules — not official FIA categories</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="conclusion">
+    <h3>Conclusion</h3>
+    <p>
+      Formula 1 championships are decided by a hierarchy of factors, not a single variable.
+      Car performance is the dominant force — an 86% match rate between driver and constructor champions confirms that machinery governs the sport at the macro level.
+      But reliability is the second pillar: champions averaged 1.3 DNFs per season versus 1.9 for runners-up,
+      and in 5 of 21 seasons, that gap alone was large enough to be mathematically championship-decisive.
+      Qualifying pace matters less than popular narrative suggests — champions like Hamilton in 2019 and Alonso in 2013 demonstrated
+      that race execution can dramatically outperform what Saturday results predicted.
+      Pit stop execution provides a compounding marginal advantage of approximately 97 seconds across a full season,
+      which amplifies existing car pace rather than substituting for it.
+      And circuit DNA reveals that no team wins everywhere equally — every car carries a performance fingerprint
+      shaped by its mechanical and aerodynamic philosophy, making the calendar structure a silent championship variable.
+      The clearest conclusion from 21 seasons of data: to win a Formula 1 World Championship,
+      you need the fastest car, the fewest failures, and a driver who can extract more from the race
+      than the car alone would suggest is possible.
+    </p>
+  </div>
+</section>
+
+<!-- Appendix / Glossary -->
+<hr class="section-divider">
+<section class="section" id="appendix">
+  <span class="q-label" style="color:var(--yellow)">Appendix &nbsp;·&nbsp; F1 Vocabulary</span>
+  <h2>F1 Glossary — Key Terms Explained</h2>
+  <p class="section-desc">
+    Formula 1 uses a specific vocabulary that can be unfamiliar to new viewers.
+    These definitions cover every term used in this analysis.
+  </p>
+
+  <div class="glossary-grid">
+
+    <div class="glossary-card">
+      <span class="glossary-term">DNF</span>
+      <span class="glossary-abbr">Did Not Finish</span>
+      <p class="glossary-def">When a driver is forced to retire from a race before the end — due to a mechanical failure, crash, or other incident. A DNF scores <strong>zero points</strong>, regardless of how well the driver was running before the retirement. In a close championship, a single DNF can be the difference between winning and losing a title.</p>
+    </div>
+
+    <div class="glossary-card">
+      <span class="glossary-term">Constructor</span>
+      <span class="glossary-abbr">F1 Team / Car Manufacturer</span>
+      <p class="glossary-def">A constructor is a team that designs and builds its own racing car. In F1, each constructor enters <strong>two cars and two drivers</strong> per race. Teams compete in two separate championships: the World Drivers' Championship (WDC) for individual drivers, and the World Constructors' Championship (WCC) for the team. Examples: Ferrari, McLaren, Red Bull, Mercedes.</p>
+    </div>
+
+    <div class="glossary-card">
+      <span class="glossary-term">Pit Stop</span>
+      <span class="glossary-abbr">Tyre Change / Service Stop</span>
+      <p class="glossary-def">A pit stop is when a car enters the pit lane during a race for a <strong>tyre change</strong> and sometimes minor repairs. A typical stop lasts 2–3 seconds for the wheel change itself, but the full pit lane transit (entry, stop, exit) adds roughly 20–30 seconds. A fast pit crew can gain or lose positions relative to rivals who stop at the same time.</p>
+    </div>
+
+    <div class="glossary-card">
+      <span class="glossary-term">Pole Position</span>
+      <span class="glossary-abbr">P1 on the Starting Grid</span>
+      <p class="glossary-def">The driver who sets the <strong>fastest time in qualifying</strong> earns pole position — they start the race from the very front of the grid. Starting from pole is a significant advantage, as it avoids traffic and allows the driver to control their own pace from lap one. Since 2021, pole position also awards 1 bonus championship point.</p>
+    </div>
+
+    <div class="glossary-card">
+      <span class="glossary-term">Qualifying</span>
+      <span class="glossary-abbr">Saturday Session — Grid Order</span>
+      <p class="glossary-def">Qualifying takes place on Saturday and determines the <strong>starting order (grid) for Sunday's race</strong>. In the modern format (Q1/Q2/Q3), the slowest drivers are eliminated in each segment until the top 10 shootout. The driver who sets the fastest overall lap time takes pole position. Qualifying pace ≠ race pace — a fast Saturday does not guarantee a strong Sunday finish.</p>
+    </div>
+
+    <div class="glossary-card">
+      <span class="glossary-term">Safety Car</span>
+      <span class="glossary-abbr">Neutralisation Period</span>
+      <p class="glossary-def">When there is a crash or dangerous debris on track, the <strong>Safety Car</strong> — a road car driven by a professional — leads the field at reduced speed while marshals clear the circuit. All cars must line up behind the Safety Car and cannot overtake. Safety Car periods often trigger <strong>strategic pit stop windows</strong>, as teams can change tyres with minimal time loss. The controversial 2021 Abu Dhabi finale involved a disputed Safety Car restart procedure that handed Verstappen the title over Hamilton.</p>
+    </div>
+
+    <div class="glossary-card">
+      <span class="glossary-term">WDC &amp; WCC</span>
+      <span class="glossary-abbr">World Drivers' &amp; Constructors' Championships</span>
+      <p class="glossary-def">F1 awards <strong>two world titles</strong> every season. The WDC (World Drivers' Championship) goes to the individual driver with the most points. The WCC (World Constructors' Championship) goes to the team whose two cars collectively score the most points. A team can win one without the other — as happened in 2008, 2021, and 2024.</p>
+    </div>
+
+    <div class="glossary-card">
+      <span class="glossary-term">Undercut / Overcut</span>
+      <span class="glossary-abbr">Pit Strategy Moves</span>
+      <p class="glossary-def">An <strong>undercut</strong> is when a driver pits <em>before</em> a rival, takes on fresh tyres, and uses the resulting pace advantage to emerge ahead in traffic. An <strong>overcut</strong> is the reverse — staying out longer on worn tyres while the rival pits, hoping track position and tyre temperature hold long enough to stay ahead. Both are core strategic weapons used by teams to gain positions without on-track overtaking.</p>
+    </div>
+
+    <div class="glossary-card">
+      <span class="glossary-term">Points System</span>
+      <span class="glossary-abbr">How Championship Points Are Awarded</span>
+      <p class="glossary-def">Points are awarded to the <strong>top 10 finishers</strong> in each race: 1st = 25 pts, 2nd = 18, 3rd = 15, 4th = 12, 5th = 10, 6th = 8, 7th = 6, 8th = 4, 9th = 2, 10th = 1. An additional <strong>1 point</strong> is awarded for the fastest lap (if the driver finishes in the top 10). A DNF scores 0. Points accumulate across all races to determine the final championship standings.</p>
+    </div>
+
+    <div class="glossary-card">
+      <span class="glossary-term">Grid</span>
+      <span class="glossary-abbr">Race Starting Order</span>
+      <p class="glossary-def">The grid is the <strong>starting formation for the race</strong>, arranged in two columns on the start/finish straight. Positions on the grid are determined by qualifying results. Starting further back means fighting through traffic, increasing the risk of early incidents and making tyre strategy more complicated. <strong>Average grid position</strong> is used in this analysis as a proxy for a driver's qualifying pace across a full championship season.</p>
+    </div>
+
+    <div class="glossary-card">
+      <span class="glossary-term">Lap Time</span>
+      <span class="glossary-abbr">Time to Complete One Circuit Lap</span>
+      <p class="glossary-def">A lap time is the duration it takes a car to complete <strong>one full circuit of the track</strong>. In F1 broadcast timing, laps are color-coded: <strong style="color:var(--purple)">purple</strong> = overall fastest lap of the session, <strong style="color:var(--green)">green</strong> = the driver's own personal best lap, <strong style="color:var(--yellow)">yellow</strong> = no improvement on previous lap. This color language is used throughout this analysis.</p>
+    </div>
+
+    <div class="glossary-card">
+      <span class="glossary-term">Circuit Archetypes</span>
+      <span class="glossary-abbr">Track Classification Used in This Analysis</span>
+      <p class="glossary-def">For Q5, circuits are grouped into four categories based on the 2026 active calendar: <strong style="color:var(--ferrari)">Street</strong> — temporary city roads with barriers and low grip (Monaco, Singapore, Baku, Las Vegas, Jeddah); <strong style="color:var(--mclaren)">High-Speed</strong> — tracks with long fast corners where top speed and aero efficiency dominate (Spa, Silverstone, Monza, Red Bull Ring); <strong style="color:var(--mercedes)">Technical/Slow</strong> — tight, low-speed layouts where mechanical grip and precision matter most (Hungaroring, Zandvoort); <strong style="color:var(--alpine)">Mixed</strong> — tracks with a blend of fast and slow sections that reward all-round balance (12 circuits, 52% of the calendar).</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <span>F1 Championship Analysis 2004–2024 &nbsp;·&nbsp; Data: Ergast API via Kaggle &nbsp;·&nbsp; Python + openpyxl</span>
+  <div class="footer-links">
+    <a href="analyse.py">View Python Script</a>
+    <a href="F1_Championship_Analysis.xlsx">Download Excel</a>
+  </div>
+</footer>
+
+</body>
+</html>
