@@ -1,7 +1,7 @@
 # What Wins F1 Championships?
 ### A Data Analysis of 21 F1 Seasons (2004–2024)
 
-> **Portfolio project** — Business Analysis using real Ergast F1 data, Python, pandas/matplotlib, and Excel (openpyxl).
+> **Portfolio project** — Business Analysis using real Ergast F1 data, Python, pandas/matplotlib, and Excel.
 
 ---
 
@@ -16,62 +16,6 @@
 | **Q5 — Circuit DNA?** | Every constructor has a comfort zone — Red Bull dominates high-speed, Ferrari excels on technical layouts, McLaren's 2024 surge was fast-corner focused. |
 
 ---
-
-## Project Structure
-
-```
-f1-analysis/
-├── index.html              # GitHub Pages portfolio site
-├── analyse.py              # Python analysis → generates charts + Excel
-├── F1_Championship_Analysis.xlsx  # 5-sheet Excel workbook (auto-generated)
-├── charts/                 # 12 PNG charts (auto-generated)
-│   ├── q1_match_bar.png
-│   ├── q1_exceptions.png
-│   ├── q2_dnf_analysis.png
-│   ├── q2_decisive.png
-│   ├── q3_grid_vs_finish.png
-│   ├── q3_poles_vs_wins.png
-│   ├── q3_positions_gained.png
-│   ├── q4_pit_avg.png
-│   ├── q4_pit_trend.png
-│   ├── q5_circuit_heatmap.png
-│   ├── q5_circuit_profile.png
-│   └── q5_circuit_normalised.png
-└── data/                   # Raw Kaggle CSVs (not committed — see below)
-    ├── results.csv
-    ├── drivers.csv
-    ├── constructors.csv
-    ├── races.csv
-    ├── driver_standings.csv
-    ├── constructor_standings.csv
-    ├── pit_stops.csv
-    ├── qualifying.csv
-    ├── circuits.csv
-    └── status.csv
-```
-
----
-
-## Running the Analysis
-
-**Requirements:** Python 3.8+
-
-```bash
-# Install dependencies
-pip install pandas matplotlib seaborn openpyxl numpy
-
-# Run analysis (generates all charts + Excel)
-python3 analyse.py
-```
-
-This will:
-1. Load 14 CSV files from the `data/` folder
-2. Run Q1–Q5 analysis (2004–2024)
-3. Export 12 PNG charts to `charts/`
-4. Export a 5-sheet Excel workbook with data tables, colour-coded analysis, and insight boxes
-
----
-
 ## Data Sources
 
 All data from the **Ergast Motor Racing Database** via [Kaggle F1 World Championship Dataset](https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020).
@@ -90,12 +34,4 @@ All data from the **Ergast Motor Racing Database** via [Kaggle F1 World Champion
 
 ---
 
-## Deploying to GitHub Pages
-
-1. Push the repo to GitHub (exclude `data/` if you prefer — charts are pre-generated)
-2. Go to **Settings → Pages → Source: main branch / root**
-3. Your site will be live at `https://<your-username>.github.io/<repo-name>/`
-
----
-
-*Built with Python (pandas, matplotlib, seaborn, openpyxl) · Ergast F1 data · 2026*
+*Built with Python · Ergast F1 data · 2026*
