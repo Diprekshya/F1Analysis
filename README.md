@@ -2,6 +2,7 @@
 ### A Data Analysis of 21 F1 Seasons (2004–2024)
 
 > **Portfolio project** — Business Analysis using real Ergast F1 data, Python, pandas/matplotlib, and Excel.
+
 > **Live Site→** https://diprekshya.github.io/F1Analysis/
 
 ---
@@ -26,14 +27,4 @@ All data from the **Ergast Motor Racing Database** via [Kaggle F1 World Champion
 
 ---
 
-## Methodology Notes
-
-- **Scope:** 2004–2024 (21 seasons of the V8/V6 hybrid turbo era)
-- **Q2 points estimate:** DNF cost calculated as driver's average finish position × points scale. Conservative, but consistent.
-- **Q4 pit times:** Total pit lane transit time (entry + stationary + exit). Outliers >60s removed (safety car/mechanical). All teams measured on the same basis — cross-team comparisons are valid.
-- **Q5 circuit classification:** Heuristic rules based on circuit name/ref — not official FIA categories. Street, High Speed, Slow/Technical, Mixed.
-- **Limitations:** Pit stop data only from 2011. Qualifying coverage varies pre-2010. 2024 data may be incomplete depending on dataset version.
-
----
-
-*Built with Python · Ergast F1 data · 2026*
+*Built with Python · 2026*
