@@ -1,5 +1,7 @@
 ## F1 Championship Analysis — Project Summary
 
+**Live site →** https://diprekshya.github.io/F1Analysis/
+
 **What I did:**
 I analyzed 21 seasons (2004–2024) of real Formula 1 data from Kaggle's F1 World Championship dataset to answer one question: *what actually determines who wins a championship?* I worked across 14 raw CSV files (results, standings, qualifying, pit stops, status codes, etc.), built a structured Excel workbook with four research questions, and visualized the findings in an interactive dashboard.
 
